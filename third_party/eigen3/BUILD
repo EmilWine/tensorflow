@@ -38,6 +38,8 @@ cc_library(
     deps = [
         "@eigen_archive//:eigen",
         "@local_config_sycl//sycl",
+	"@mkl_linux//:mkl_headers",
+	"@mkl_linux//:mkl_libs_linux"
     ],
 )
 
