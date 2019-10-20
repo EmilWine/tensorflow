@@ -17,11 +17,17 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+#"lib/libmklml_intel.so",
+#"lib/libiomp5.so",
 cc_library(
     name = "mkl_libs_linux",
     srcs = [
-        "lib/libiomp5.so",
-        "lib/libmklml_intel.so",
+        "lib/libmkl_intel_lp64.so",
+        "lib/libmkl_core.so",
+        "lib/libmkl_sequential.so",
+        "lib/libmkl_rt.so",
+	"lib/libmkl_def.so",
+	"lib/libmkl_avx2.so",
     ],
     visibility = ["//visibility:public"],
 )
