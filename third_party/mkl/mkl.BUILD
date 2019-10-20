@@ -22,6 +22,7 @@ cc_library(
 cc_library(
     name = "mkl_libs_linux",
     srcs = [
+        "lib/libiomp5.so",
         "lib/libmkl_intel_lp64.so",
         "lib/libmkl_core.so",
         "lib/libmkl_sequential.so",
