@@ -2,6 +2,14 @@
   <img src="https://www.tensorflow.org/images/tf_logo_social.png">
 </div>
 
+
+## MKL Version
+This version implements:
+
+1. MKL backend for Eigen
+2. 1DFFT of tensors using MKL FFTW wrapper
+
+
 **`Documentation`** |
 ------------------- |
 [![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://www.tensorflow.org/api_docs/) |
