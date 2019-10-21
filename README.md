@@ -9,6 +9,12 @@ This version implements:
 1. MKL backend for Eigen
 2. 1DFFT of tensors using MKL FFTW wrapper
 
+You must install MKL development libraries - e.g. http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/15816/l_mkl_2019.5.281.tgz
+Make sure to install and export MKL environment variables on by adding the following line at bashrc:
+```. <MKL_INSTALLATION_PATH>/bin/compilervars.sh -arch intel64
+
+
+
 
 **`Documentation`** |
 ------------------- |
