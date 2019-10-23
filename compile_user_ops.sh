@@ -22,7 +22,5 @@ export TF_MKL_ROOT="${PWD}/mklml/${MKLML_PREFACE}"
 
 
 JOBS=$(($(grep -c processor /proc/cpuinfo)-2))
-
-bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl  --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL"   //tensorflow/tools/pip_package:build_pip_package
 #--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0"
-. ./bazel-bin/tensorflow/tools/pip_package/build_pip_package ./pip_package/
+bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" -s //tensorflow/core/user_ops:emilsky_op.so
