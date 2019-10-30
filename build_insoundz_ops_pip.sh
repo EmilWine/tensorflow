@@ -13,7 +13,7 @@ combinediff ./third_party/eigen3/gpu_packet_math.patch ./third_party/eigen3/tens
 MKLML_PREFACE="mklml_lnx_2019.0.5.20190502"
 echo "######   Preparing MKL Library for compilation   ######"
 mkdir -p ./mklml
-wget https://github.com/intel/mkl-dnn/releases/download/v0.21/${MKLML_PREFACE}.tgz -O mklml.tgz
+wget -N -nc https://github.com/intel/mkl-dnn/releases/download/v0.21/${MKLML_PREFACE}.tgz -O mklml.tgz
 tar -C ./mklml -xzvf ./mklml.tgz
 ln -s $MKLROOT/include/* mklml/${MKLML_PREFACE}/include/ 2>/dev/null
 ln -s $MKLROOT/lib/intel64/* mklml/${MKLML_PREFACE}/lib/ 2>/dev/null 
@@ -23,6 +23,6 @@ export TF_MKL_ROOT="${PWD}/mklml/${MKLML_PREFACE}"
 
 JOBS=$(($(grep -c processor /proc/cpuinfo)-2))
 
-bazel build --jobs ${JOBS} -c opt  --compilation_mode=dbg -c dbg --copt=-g --copt=-O --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" --cxxopt="-g" --strip=never //tensorflow/tools/pip_package:build_pip_package
+#DBG="--compilation_mode=dbg -c dbg --copt=-g --copt=-O0 --cxxopt=-O0 --cxxopt=-g --strip=never -s"
 
-. ./bazel-bin/tensorflow/tools/pip_package/build_pip_package ./pip_package/
+bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops/insoundz:build_pip_pkg

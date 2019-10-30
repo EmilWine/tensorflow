@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import tensorflow as tf
 import numpy as np
-mod = tf.load_op_library("../bazel-bin/tensorflow/core/user_ops/rankoneupdate_op.so")
+mod = tf.load_op_library("../bazel-bin/tensorflow/core/user_ops/rankoneupdate/rankoneupdate_op.so")
 alpha = tf.constant(0.1,dtype='float32')
 
 class C: pass
