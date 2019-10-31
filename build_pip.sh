@@ -28,6 +28,6 @@ JOBS=$(($(grep -c processor /proc/cpuinfo)-2))
 #--cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0"
 
 bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl  --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" ${DBG} //tensorflow/tools/pip_package:build_pip_package && \
-bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops/insoundz:build_pip_pkg && \
+bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops/insoundz_ops:build_pip_pkg && \
 . ./bazel-bin/tensorflow/tools/pip_package/build_pip_package ./pip_package/ && \
-. ./bazel-bin/tensorflow/core/user_ops/insoundz/build_pip_pkg ./pip_package
+. ./bazel-bin/tensorflow/core/user_ops/insoundz_ops/build_pip_pkg ./pip_package
