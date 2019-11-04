@@ -18,24 +18,14 @@ load("//tensorflow:tensorflow.bzl", "tf_custom_op_library")
 
 tf_custom_op_library(
 		name = "python/ops/_rankoneupdate_ops.so",
-		srcs = ["cc/rankoneupdate_op.cc"],
+		srcs = ["cc/kernels/rankoneupdate_kernel.cc",
+			"cc/ops/rankoneupdate_ops.cc", 
+	  	],
 		deps = 
 		["//tensorflow/core:framework",
 		  "//tensorflow/core:lib",
 		  "//tensorflow/core/kernels:linalg_ops_common"
 	  	])
-
-#cc_binary(
-#    name = 'python/ops/_rankoneupdate_ops.so',
-#    srcs = ["cc/rankoneupdate_op.cc"],
-#    linkshared = 1,
-#    deps = 
-#    ["//tensorflow/core:framework",
-#      "//tensorflow/core:lib",
-#      "//tensorflow/core/kernels:linalg_ops_common"
-#    ],
-#    copts = ["-pthread", "-std=c++11", "-D_GLIBCXX_USE_CXX10_ABI=0"])
-
 
 py_library(
     name = "rankoneupdate_ops_py",
