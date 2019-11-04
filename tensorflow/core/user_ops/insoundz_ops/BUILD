@@ -6,5 +6,6 @@ sh_binary(
 	"tf_insoundz/__init__.py",
 	"MANIFEST.in",
         "//tensorflow/core/user_ops/insoundz_ops/tf_insoundz/rankoneupdate:rankoneupdate_py",
+        "//tensorflow/core/user_ops/insoundz_ops/tf_insoundz/hermitian_matmul:hermitian_matmul_py",
     ],
 )
