@@ -1,0 +1,51 @@
+diff --git a/Eigen/Core b/Eigen/Core
+index bb8ad464d..b1f17e3f7 100644
+--- a/Eigen/Core
++++ b/Eigen/Core
+@@ -345,6 +345,7 @@ using std::ptrdiff_t;
+ #include "src/Core/products/GeneralMatrixMatrixTriangular_BLAS.h"
+ #include "src/Core/products/SelfadjointMatrixMatrix_BLAS.h"
+ #include "src/Core/products/SelfadjointMatrixVector_BLAS.h"
++#include "src/Core/products/SelfadjointProduct_BLAS.h"
+ #include "src/Core/products/TriangularMatrixMatrix_BLAS.h"
+ #include "src/Core/products/TriangularMatrixVector_BLAS.h"
+ #include "src/Core/products/TriangularSolverMatrix_BLAS.h"
+index e69de29bb..fbf7d6433 100644
+--- /dev/null
++++ b/Eigen/src/Core/products/SelfadjointProduct_BLAS.h
+@@ -0,0 +1,35 @@
++#ifndef EIGEN_SELFADJOINT_PRODUCT_BLAS_H
++#define EIGEN_SELFADJOINT_PRODUCT_BLAS_H
++
++namespace Eigen { 
++
++#define EIGEN_BLAS_SHER_SPECIALIZATION(EIGTYPE,EIGREALTYPE,BLASTYPE,BLASFUNC) \
++template<typename Index, int UpLo, bool ConjLhs, bool ConjRhs> \
++struct selfadjoint_rank1_update<EIGTYPE,Index,ColMajor,UpLo,ConjLhs,ConjRhs> \
++{ \
++  static void run(Index size, EIGTYPE* mat, Index stride, const EIGTYPE* vecX, const EIGTYPE* vecY, const EIGTYPE& alpha) \
++  { \
++    internal::conj_if<ConjRhs> cj; \
++    typedef Map<const Matrix<EIGTYPE,Dynamic,1> > OtherMap; \
++    char uplo = UpLo == Lower ? 'L':'U'; \
++    BlasIndex n = internal::convert_index<BlasIndex>(size), lda=internal::convert_index<BlasIndex>(stride), incx=1, incy=1; \
++    BLASFUNC(&uplo,&n, (const EIGREALTYPE*)&numext::real_ref(alpha), (const BLASTYPE*) vecX, &incx,(BLASTYPE*)mat,(const BlasIndex*) &lda); \
++  } \
++};
++
++
++#ifdef EIGEN_USE_MKL
++EIGEN_BLAS_SHER_SPECIALIZATION(double, double,  double, dsyr)
++EIGEN_BLAS_SHER_SPECIALIZATION(float,  float,  float,  ssyr)
++EIGEN_BLAS_SHER_SPECIALIZATION(dcomplex, double, MKL_Complex16, zher)
++EIGEN_BLAS_SHER_SPECIALIZATION(scomplex, float,MKL_Complex8,  cher)
++#else
++EIGEN_BLAS_SHER_SPECIALIZATION(double, double,  double, dsyr_)
++EIGEN_BLAS_SHER_SPECIALIZATION(float, float,   float,  ssyr_)
++EIGEN_BLAS_SHER_SPECIALIZATION(dcomplex, double,double, zher_)
++EIGEN_BLAS_SHER_SPECIALIZATION(scomplex, float, float,  cher_)
++#endif
++
++} // end namespace Eigen
++
++#endif // EIGEN_SELFADJOINT_PRODUCT_H

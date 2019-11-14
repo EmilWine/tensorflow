@@ -51,3 +51,16 @@ py_library(
     srcs_version = "PY2AND3",
 )
 
+py_test(
+    name = "rankoneupdate_ops_py_test",
+    srcs = [
+        "python/ops/rankoneupdate_op_test.py"
+    ],
+    main = "python/ops/rankoneupdate_op_test.py",
+    deps = [
+        ":rankoneupdate_ops_py",
+    ],
+    srcs_version = "PY2AND3",
+)
+
+
