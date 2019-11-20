@@ -8,7 +8,7 @@ then
 fi
 
 echo "Patching eigen to support Tensor FFT with MKL"
-combinediff ./third_party/eigen3/gpu_packet_math.patch ./third_party/eigen3/tensor_fft.patch | combinediff - ./third_party/eigen3/blas_syr.patch > eigen.patch
+combinediff ./third_party/eigen3/gpu_packet_math.patch ./third_party/eigen3/tensor_fft.patch | combinediff - ./third_party/eigen3/blas_syr.patch > ./third_party/eigen3/eigen.patch
 
 MKLML_PREFACE="mklml_lnx_2019.0.5.20190502"
 echo "######   Preparing MKL Library for compilation   ######"
@@ -22,11 +22,16 @@ ln -s $MKLROOT/lib/intel64/* mklml/${MKLML_PREFACE}/lib/ 2>/dev/null
 export TF_MKL_ROOT="${PWD}/mklml/${MKLML_PREFACE}"
 
 
+DEBUG="-c dbg --copt=-g --copt=-O0 --cxxopt=-O0 --cxxopt=-g --strip=never -s"
+RELEASE="-c opt"
+#BUILD_ARGS=$DEBUG
+
+OPTIM="--copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both"
+BUILD_ARGS=$RELEASE $OPTIM
+
 JOBS=$(($(grep -c processor /proc/cpuinfo)-2))
-DBG="--compilation_mode=dbg -c dbg --copt=-g --copt=-O0 --cxxopt=-O0 --cxxopt=-g --strip=never -s"
 
-
-bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl  --cxxopt="-DEIGEN_USE_BLAS" --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" //tensorflow/tools/pip_package:build_pip_package && \
-bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_USE_BLAS" --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops/insoundz_ops:build_pip_pkg && \
+bazel build --jobs ${JOBS} $BUILD_ARGS --config=mkl --cxxopt="-DEIGEN_USE_BLAS" --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" //tensorflow/tools/pip_package:build_pip_package && \
 . ./bazel-bin/tensorflow/tools/pip_package/build_pip_package ./pip_package/ && \
+bazel build --jobs ${JOBS} $BUILD_ARGS --config=mkl --cxxopt="-DEIGEN_USE_BLAS" --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" //tensorflow/core/user_ops/insoundz_ops:build_pip_pkg && \
 . ./bazel-bin/tensorflow/core/user_ops/insoundz_ops/build_pip_pkg ./pip_package

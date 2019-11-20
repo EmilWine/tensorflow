@@ -8,7 +8,7 @@ then
 fi
 
 echo "Patching eigen to support Tensor FFT with MKL"
-combinediff ./third_party/eigen3/gpu_packet_math.patch ./third_party/eigen3/tensor_fft.patch > ./third_party/eigen3/gpu_packet_math.patch
+combinediff ./third_party/eigen3/gpu_packet_math.patch ./third_party/eigen3/tensor_fft.patch | combinediff - ./third_party/eigen3/blas_syr.patch > ./third_party/eigen3/eigen.patch
 
 MKLML_PREFACE="mklml_lnx_2019.0.5.20190502"
 echo "######   Preparing MKL Library for compilation   ######"
@@ -26,8 +26,8 @@ JOBS=$(($(grep -c processor /proc/cpuinfo)-2))
 
 
 DBG="--compilation_mode=dbg -c dbg --copt=-g --copt=-O0 --cxxopt=-O0 --cxxopt=-g --strip=never -s"
-
-bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops:build_pip_pkg
+bazel build --jobs ${JOBS} --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_USE_BLAS" --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops/insoundz_ops/tf_insoundz/rankoneupdate:python/ops/_rankoneupdate_ops.so
+#bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops:build_pip_pkg
 #bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops/rankoneupdate:rankoneupdate_op.so
 #bazel build --jobs ${JOBS} -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --config=mkl --cxxopt="-DEIGEN_MKL_DEFAULT" --cxxopt="-DEIGEN_USE_MKL_ALL" $DBG //tensorflow/core/user_ops:rankoneupdate_op.so
 

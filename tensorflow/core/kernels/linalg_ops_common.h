@@ -151,7 +151,7 @@ class LinearAlgebraOp : public OpKernel {
                              const InputConstMatrixMaps& inputs,
                              OutputMatrixMaps* outputs) = 0;
 
- private:
+ protected:
   using TensorInputs = gtl::InlinedVector<const Tensor*, 4>;
   using TensorOutputs = gtl::InlinedVector<Tensor*, 4>;
   // This function maps 2-d slices (matrices) of the input and output tensors
