@@ -19,7 +19,7 @@ load("//tensorflow:tensorflow.bzl", "tf_custom_op_library")
 tf_custom_op_library(
 		name = "python/ops/_rankoneupdate_ops.so",
 		srcs = ["cc/kernels/rankoneupdate_kernel.cc",
-			"cc/ops/rankoneupdate_ops.cc", 
+			"cc/ops/rankoneupdate_ops.cc",
 	  	],
 		deps = 
 		["//tensorflow/core:framework",

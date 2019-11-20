@@ -1,4 +1,3 @@
-//#include "third_party/eigen3/Eigen/Cholesky"
 #include "third_party/eigen3/Eigen/Core"
 #include "tensorflow/core/framework/kernel_def_builder.h"
 #include "tensorflow/core/framework/op_kernel.h"
@@ -53,25 +52,14 @@ class HermitianMatmulOp : public LinearAlgebraOp<Scalar> {
     const ConstMatrixMap& rhs = inputs[1];
     
     if (matrix.rows() == 0 || matrix.cols() == 0  || rhs.cols() == 0) {
-      // To be consistent with the MatrixInverse op, we define the solution for
-      // an empty set of equation as the empty matrix.
       return;
     }
-
-    // Perform the actual HermitianMatmul. This will only use
-    // the lower triangular part of data_in by default. 
-    //We can work directly on the output as it was forwarded directly from the input
-
     MatrixMap& output = outputs->at(0);
-    
-    //This is actually a copy operation of eigen, becaued its mapped. 
-    //This is redundant if we could enforce direct update to the variable, like assign_add op.
-    //Didn't find a way to do so yet. 
-    output.noalias() = matrix; 
+
 	
     //Take only the lower part to update. More efficient.
     auto triangle = matrix.template selfadjointView<Eigen::Lower>();
-    output = triangle * rhs;    
+    output = triangle * rhs;
   }
  private:
   bool adjoint_;
