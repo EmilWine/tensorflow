@@ -10,6 +10,23 @@ index bb8ad464d..b1f17e3f7 100644
  #include "src/Core/products/TriangularMatrixMatrix_BLAS.h"
  #include "src/Core/products/TriangularMatrixVector_BLAS.h"
  #include "src/Core/products/TriangularSolverMatrix_BLAS.h"
+diff --git a/Eigen/src/Core/ProductEvaluators.h b/Eigen/src/Core/ProductEvaluators.h
+index d53dc30a3..acfbc3ce3 100644
+--- a/Eigen/src/Core/ProductEvaluators.h
++++ b/Eigen/src/Core/ProductEvaluators.h
+@@ -797,7 +797,11 @@ struct generic_product_impl<Lhs,Rhs,SelfAdjointShape,DenseShape,ProductTag>
+   static EIGEN_DEVICE_FUNC
+   void scaleAndAddTo(Dest& dst, const Lhs& lhs, const Rhs& rhs, const Scalar& alpha)
+   {
+-    selfadjoint_product_impl<typename Lhs::MatrixType,Lhs::Mode,false,Rhs,0,Rhs::IsVectorAtCompileTime>::run(dst, lhs.nestedExpression(), rhs, alpha);
++	  if (rhs.cols() ==1 || rhs.rows() == 1){
++	    selfadjoint_product_impl<typename Lhs::MatrixType,Lhs::Mode,false,Rhs,0,true>::run(dst, lhs.nestedExpression(), rhs, alpha);
++	  }
++	  else
++	    selfadjoint_product_impl<typename Lhs::MatrixType,Lhs::Mode,false,Rhs,0,false>::run(dst, lhs.nestedExpression(), rhs, alpha);
+   }
+ };
+ 
 diff --git a/Eigen/src/Core/products/GeneralMatrixMatrixTriangular_BLAS.h b/Eigen/src/Core/products/GeneralMatrixMatrixTriangular_BLAS.h
 index 9a650ec23..444216c2d 100644
 --- a/Eigen/src/Core/products/GeneralMatrixMatrixTriangular_BLAS.h
@@ -44,6 +61,41 @@ index 9a650ec23..444216c2d 100644
  
  
  } // end namespace internal
+diff --git a/Eigen/src/Core/products/SelfadjointMatrixVector.h b/Eigen/src/Core/products/SelfadjointMatrixVector.h
+index d38fd72b2..91623741e 100644
+--- a/Eigen/src/Core/products/SelfadjointMatrixVector.h
++++ b/Eigen/src/Core/products/SelfadjointMatrixVector.h
+@@ -220,7 +220,7 @@ struct selfadjoint_product_impl<Lhs,LhsMode,false,Rhs,0,true>
+       Index size = rhs.size();
+       EIGEN_DENSE_STORAGE_CTOR_PLUGIN
+       #endif
+-      Map<typename ActualRhsTypeCleaned::PlainObject>(actualRhsPtr, rhs.size()) = rhs;
++      //Map<typename ActualRhsTypeCleaned::PlainObject>(actualRhsPtr, rhs.size()) = rhs;
+     }
+       
+       
+diff --git a/Eigen/src/Core/products/SelfadjointMatrixVector_BLAS.h b/Eigen/src/Core/products/SelfadjointMatrixVector_BLAS.h
+index 1238345e3..dafea87cf 100644
+--- a/Eigen/src/Core/products/SelfadjointMatrixVector_BLAS.h
++++ b/Eigen/src/Core/products/SelfadjointMatrixVector_BLAS.h
+@@ -53,17 +53,9 @@ struct selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,Conjugat
+ static void run( \
+   Index size, const Scalar*  lhs, Index lhsStride, \
+   const Scalar* _rhs, Scalar* res, Scalar alpha) { \
+-    enum {\
+-      IsColMajor = StorageOrder==ColMajor \
+-    }; \
+-    if (IsColMajor == ConjugateLhs) {\
+-      selfadjoint_matrix_vector_product<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs,BuiltIn>::run( \
+-        size, lhs, lhsStride, _rhs, res, alpha);  \
+-    } else {\
+       selfadjoint_matrix_vector_product_symv<Scalar,Index,StorageOrder,UpLo,ConjugateLhs,ConjugateRhs>::run( \
+         size, lhs, lhsStride, _rhs, res, alpha);  \
+     }\
+-  } \
+ }; \
+ 
+ EIGEN_BLAS_SYMV_SPECIALIZE(double)
 diff --git a/Eigen/src/Core/products/SelfadjointProduct.h b/Eigen/src/Core/products/SelfadjointProduct.h
 index 61e8894e7..d291391c9 100644
 --- a/Eigen/src/Core/products/SelfadjointProduct.h
@@ -86,8 +138,9 @@ index 61e8894e7..d291391c9 100644
    return *this;
  }
 diff --git a/Eigen/src/Core/products/SelfadjointProduct_BLAS.h b/Eigen/src/Core/products/SelfadjointProduct_BLAS.h
-index e69de29bb..93fbfad97 100644
---- a/Eigen/src/Core/products/SelfadjointProduct_BLAS.h
+new file mode 100644
+index 000000000..93fbfad97
+--- /dev/null
 +++ b/Eigen/src/Core/products/SelfadjointProduct_BLAS.h
 @@ -0,0 +1,88 @@
 +#ifndef EIGEN_SELFADJOINT_PRODUCT_BLAS_H
