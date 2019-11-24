@@ -27,7 +27,7 @@ RELEASE="-c opt"
 #BUILD_ARGS=$DEBUG
 
 OPTIM="--copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both"
-BUILD_ARGS=$RELEASE $OPTIM
+BUILD_ARGS="$RELEASE $OPTIM"
 
 JOBS=$(($(grep -c processor /proc/cpuinfo)-2))
 
