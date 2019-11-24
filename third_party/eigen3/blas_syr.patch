@@ -1,12 +1,21 @@
 diff --git a/Eigen/Core b/Eigen/Core
-index bb8ad464d..b1f17e3f7 100644
+index bb8ad464d..46c8019fe 100644
 --- a/Eigen/Core
 +++ b/Eigen/Core
-@@ -345,6 +345,7 @@ using std::ptrdiff_t;
+@@ -313,6 +313,7 @@ using std::ptrdiff_t;
+ #include "src/Core/products/GeneralBlockPanelKernel.h"
+ #include "src/Core/products/Parallelizer.h"
+ #include "src/Core/ProductEvaluators.h"
++#include "src/Core/products/MatrixScale.h"
+ #include "src/Core/products/GeneralMatrixVector.h"
+ #include "src/Core/products/GeneralMatrixMatrix.h"
+ #include "src/Core/SolveTriangular.h"
+@@ -345,6 +346,8 @@ using std::ptrdiff_t;
  #include "src/Core/products/GeneralMatrixMatrixTriangular_BLAS.h"
  #include "src/Core/products/SelfadjointMatrixMatrix_BLAS.h"
  #include "src/Core/products/SelfadjointMatrixVector_BLAS.h"
 +#include "src/Core/products/SelfadjointProduct_BLAS.h"
++#include "src/Core/products/MatrixScale_BLAS.h"
  #include "src/Core/products/TriangularMatrixMatrix_BLAS.h"
  #include "src/Core/products/TriangularMatrixVector_BLAS.h"
  #include "src/Core/products/TriangularSolverMatrix_BLAS.h"
@@ -61,6 +70,89 @@ index 9a650ec23..444216c2d 100644
  
  
  } // end namespace internal
+diff --git a/Eigen/src/Core/products/MatrixScale.h b/Eigen/src/Core/products/MatrixScale.h
+new file mode 100644
+index 000000000..841d9c549
+--- /dev/null
++++ b/Eigen/src/Core/products/MatrixScale.h
+@@ -0,0 +1,41 @@
++#ifndef EIGEN_MATRIX_SCALE_H
++#define EIGEN_MATRIX_SCALE_H
++
++namespace Eigen { 
++
++template<typename Scalar, typename Index>
++struct matrix_scale_add_imp;
++
++template<typename Scalar, typename Index>
++struct matrix_scale_add_imp
++{
++	static void run(Index size, Scalar *dest, const Scalar *in, const Scalar alpha){
++		typedef Map<Matrix<Scalar,Dynamic,1> > ResMap;
++		typedef Map<const Matrix<Scalar,Dynamic,1> > OtherMap;
++		ResMap dest_map = ResMap(dest, size);
++		OtherMap in_map = OtherMap(in, size);
++		dest_map = alpha*in_map +dest_map; 
++	}
++};
++
++//template<typename Index>
++//struct matrix_scale_add_imp<std::complex<float>,Index>
++//{
++//	typedef std::complex<float> Scalar;
++//	static void run(Index size, Scalar *dest, const Scalar *in, const Scalar alpha){
++//		BlasIndex n = internal::convert_index<BlasIndex>(size), incx=1, incy=1;
++//		caxpy(&n, (const MKL_Complex8*)&numext::real_ref(alpha) ,(const MKL_Complex8*) in, &incx, (MKL_Complex8*)dest, &incy);
++//	}
++//};
++
++template<typename MatrixType>
++struct matrix_scale_add
++{
++  static void run(MatrixType& dest, const MatrixType& x, const typename MatrixType::Scalar& alpha)
++  {
++	matrix_scale_add_imp<typename MatrixType::Scalar, Index>::run(dest.size(),dest.data(),x.data(),alpha);
++  }
++};
++}
++
++#endif
+diff --git a/Eigen/src/Core/products/MatrixScale_BLAS.h b/Eigen/src/Core/products/MatrixScale_BLAS.h
+new file mode 100644
+index 000000000..e66bab318
+--- /dev/null
++++ b/Eigen/src/Core/products/MatrixScale_BLAS.h
+@@ -0,0 +1,30 @@
++#ifndef EIGEN_MATRIX_SCALE_BLAS_H
++#define EIGEN_MATRIX_SCALE_BLAS_H
++
++namespace Eigen { 
++
++#define EIGEN_BLAS_AXPY_SPECIALIZATION(EIGTYPE,BLASTYPE,BLASFUNC) \
++template<typename Index>\
++struct matrix_scale_add_imp<EIGTYPE,Index>\
++{ \
++	typedef EIGTYPE Scalar; \
++	static void run(Index size, Scalar *dest, const Scalar *in, const Scalar alpha){ \
++		BlasIndex n = internal::convert_index<BlasIndex>(size), incx=1, incy=1; \
++		BLASFUNC(&n, (const BLASTYPE*)&numext::real_ref(alpha) ,(const BLASTYPE*) in, &incx, (BLASTYPE*)dest, &incy); \
++	} \
++}; \
++
++#ifdef EIGEN_USE_MKL
++EIGEN_BLAS_AXPY_SPECIALIZATION(float, float, saxpy)
++EIGEN_BLAS_AXPY_SPECIALIZATION(double, double, daxpy)
++EIGEN_BLAS_AXPY_SPECIALIZATION(scomplex, MKL_Complex8, caxpy)
++EIGEN_BLAS_AXPY_SPECIALIZATION(dcomplex, MKL_Complex16, zaxpy)
++#else
++EIGEN_BLAS_AXPY_SPECIALIZATION(float, float, saxpy_)
++EIGEN_BLAS_AXPY_SPECIALIZATION(double, double, daxpy_)
++EIGEN_BLAS_AXPY_SPECIALIZATION(scomplex, scomplex, caxpy_)
++EIGEN_BLAS_AXPY_SPECIALIZATION(dcomplex, dcomplex, zaxpy_)
++#endif
++
++}
++#endif
 diff --git a/Eigen/src/Core/products/SelfadjointMatrixVector.h b/Eigen/src/Core/products/SelfadjointMatrixVector.h
 index d38fd72b2..91623741e 100644
 --- a/Eigen/src/Core/products/SelfadjointMatrixVector.h

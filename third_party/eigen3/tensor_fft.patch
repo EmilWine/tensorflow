@@ -1,16 +1,20 @@
 diff --git a/unsupported/Eigen/CXX11/src/Tensor/TensorFFT.h b/unsupported/Eigen/CXX11/src/Tensor/TensorFFT.h
-index 7be007d94..c52a99d85 100644
+index 55c7d6831..c52a99d85 100644
 --- a/unsupported/Eigen/CXX11/src/Tensor/TensorFFT.h
 +++ b/unsupported/Eigen/CXX11/src/Tensor/TensorFFT.h
-@@ -13,6 +13,7 @@
- // This code requires the ability to initialize arrays of constant
- // values directly inside a class.
- #if __cplusplus >= 201103L || EIGEN_COMP_MSVC >= 1900
-+#include <unsupported/Eigen/FFT>
+@@ -10,6 +10,11 @@
+ #ifndef EIGEN_CXX11_TENSOR_TENSOR_FFT_H
+ #define EIGEN_CXX11_TENSOR_TENSOR_FFT_H
  
++// This code requires the ability to initialize arrays of constant
++// values directly inside a class.
++#if __cplusplus >= 201103L || EIGEN_COMP_MSVC >= 1900
++#include <unsupported/Eigen/FFT>
++
  namespace Eigen {
  
-@@ -218,6 +219,7 @@ struct TensorEvaluator<const TensorFFTOp<FFT, ArgType, FFTResultType, FFTDir>, D
+ /** \class TensorFFT
+@@ -214,6 +219,7 @@ struct TensorEvaluator<const TensorFFTOp<FFT, ArgType, FFTResultType, FFTDir>, D
  #endif
  
   private:
@@ -18,7 +22,7 @@ index 7be007d94..c52a99d85 100644
    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void evalToBuf(EvaluatorPointerType data) {
      const bool write_to_out = internal::is_same<OutputScalar, ComplexScalar>::value;
      ComplexScalar* buf = write_to_out ? (ComplexScalar*)data : (ComplexScalar*)m_device.allocate(sizeof(ComplexScalar) * m_size);
-@@ -230,88 +232,37 @@ struct TensorEvaluator<const TensorFFTOp<FFT, ArgType, FFTResultType, FFTDir>, D
+@@ -226,88 +232,37 @@ struct TensorEvaluator<const TensorFFTOp<FFT, ArgType, FFTResultType, FFTDir>, D
        Index dim = m_fft[i];
        eigen_assert(dim >= 0 && dim < NumDims);
        Index line_len = m_dimensions[dim];
@@ -130,7 +134,7 @@ index 7be007d94..c52a99d85 100644
      }
  
      if(!write_to_out) {
-@@ -322,6 +273,12 @@ struct TensorEvaluator<const TensorFFTOp<FFT, ArgType, FFTResultType, FFTDir>, D
+@@ -318,6 +273,12 @@ struct TensorEvaluator<const TensorFFTOp<FFT, ArgType, FFTResultType, FFTDir>, D
      }
    }
  
@@ -143,6 +147,14 @@ index 7be007d94..c52a99d85 100644
    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE static bool isPowerOfTwo(Index x) {
      eigen_assert(x > 0);
      return !(x & (x - 1));
+@@ -667,4 +628,7 @@ struct TensorEvaluator<const TensorFFTOp<FFT, ArgType, FFTResultType, FFTDir>, D
+ 
+ }  // end namespace Eigen
+ 
++#endif  // EIGEN_HAS_CONSTEXPR
++
++
+ #endif  // EIGEN_CXX11_TENSOR_TENSOR_FFT_H
 diff --git a/unsupported/Eigen/FFT b/unsupported/Eigen/FFT
 index d9ad21a5a..8236df6fe 100644
 --- a/unsupported/Eigen/FFT
@@ -175,7 +187,7 @@ index d9ad21a5a..8236df6fe 100644
      inline
      bool HasFlag(Flag f) const { return (m_flag & (int)f) == f;}
 diff --git a/unsupported/test/cxx11_tensor_fft.cpp b/unsupported/test/cxx11_tensor_fft.cpp
-index 641486a4a..6c0e6d85f 100644
+index 641486a4a..f83196a14 100644
 --- a/unsupported/test/cxx11_tensor_fft.cpp
 +++ b/unsupported/test/cxx11_tensor_fft.cpp
 @@ -9,6 +9,7 @@
@@ -196,10 +208,11 @@ index 641486a4a..6c0e6d85f 100644
      VERIFY_IS_APPROX(output(0) + c_offset, output_golden[0] + c_offset);
      VERIFY_IS_APPROX(output(1) + c_offset, output_golden[1] + c_offset);
      VERIFY_IS_APPROX(output(2) + c_offset, output_golden[2] + c_offset);
-@@ -112,6 +114,36 @@ static void test_fft_complex_input_golden() {
-     VERIFY_IS_APPROX(reverse_output_imag_part(i), reverse_golden_result[i].imag());
+@@ -113,6 +115,38 @@ static void test_fft_complex_input_golden() {
    }
  }
+ 
++
 +template <size_t Repeats,size_t WindowSize, int DataLayout, typename RealScalar, bool isComplexInput, int FFTResultType, int FFTDirection,int TensorRank>
 +static void bench_fft_large_input() {
 +	Eigen::DSizes<ptrdiff_t, TensorRank> dimensions;
@@ -230,10 +243,11 @@ index 641486a4a..6c0e6d85f 100644
 +	timerFFT.stop();
 +	std::cout << "FFT x"  << Repeats << ": " << timerFFT.value() << "s\n";
 +}
- 
++
  static void test_fft_real_input_golden() {
    Tensor<float, 1, ColMajor> input(5);
-@@ -181,7 +213,7 @@ static void test_fft_real_input_energy() {
+   input(0) = 1.0;
+@@ -181,7 +215,7 @@ static void test_fft_real_input_energy() {
    Eigen::DSizes<ptrdiff_t, TensorRank> dimensions;
    ptrdiff_t total_size = 1;
    for (int i = 0; i < TensorRank; ++i) {
@@ -242,7 +256,7 @@ index 641486a4a..6c0e6d85f 100644
      total_size *= dimensions[i];
    }
    const DSizes<ptrdiff_t, TensorRank> arr = dimensions;
-@@ -205,9 +237,19 @@ static void test_fft_real_input_energy() {
+@@ -205,9 +239,19 @@ static void test_fft_real_input_energy() {
      VERIFY_IS_EQUAL(output.dimension(i), input.dimension(i));
    }
  
@@ -263,7 +277,7 @@ index 641486a4a..6c0e6d85f 100644
    for (int i = 0; i < total_size; ++i) {
      energy_original += numext::abs2(input(i));
    }
-@@ -301,4 +343,37 @@ EIGEN_DECLARE_TEST(cxx11_tensor_fft) {
+@@ -301,4 +345,37 @@ EIGEN_DECLARE_TEST(cxx11_tensor_fft) {
  
      test_fft_non_power_of_2_round_trip<float>(7);
      test_fft_non_power_of_2_round_trip<double>(7);
