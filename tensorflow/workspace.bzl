@@ -168,15 +168,26 @@ def tf_repositories(path_prefix = "", tf_repo_name = ""):
         ],
     )
 
+    #tf_http_archive(
+    #    name = "eigen_archive",
+    #    build_file = clean_dep("//third_party:eigen.BUILD"),
+    #    patch_file = clean_dep("//third_party/eigen3:gpu_packet_math.patch"),
+    #    sha256 = "6d8ed482addd14892d7b0bd98fec2c02f18fdab97775bda68c3f2a99ffb190fb",
+    #    strip_prefix = "eigen-eigen-66be6c76fc01",
+    #    urls = [
+    #        "https://storage.googleapis.com/mirror.tensorflow.org/bitbucket.org/eigen/eigen/get/66be6c76fc01.tar.gz",
+    #        "https://bitbucket.org/eigen/eigen/get/66be6c76fc01.tar.gz",
+    #    ],
+    #)
     tf_http_archive(
         name = "eigen_archive",
         build_file = clean_dep("//third_party:eigen.BUILD"),
         patch_file = clean_dep("//third_party/eigen3:gpu_packet_math.patch"),
-        sha256 = "6d8ed482addd14892d7b0bd98fec2c02f18fdab97775bda68c3f2a99ffb190fb",
-        strip_prefix = "eigen-eigen-66be6c76fc01",
+        sha256 = "3cbe696736d7c56526feae0d2a45a1d688eb40d9fa442ef43ce9bf82ddbc0cb9",
+        strip_prefix = "eigen-git-mirror-TestPatches",
         urls = [
-            "https://storage.googleapis.com/mirror.tensorflow.org/bitbucket.org/eigen/eigen/get/66be6c76fc01.tar.gz",
-            "https://bitbucket.org/eigen/eigen/get/66be6c76fc01.tar.gz",
+	        "https://github.com/EmilWine/eigen-git-mirror/archive/TestPatches.tar.gz",
+            "https://storage.googleapis.com/mirror.tensorflow.org/.tar.gz",
         ],
     )
 
