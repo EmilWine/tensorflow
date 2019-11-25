@@ -7,5 +7,6 @@ sh_binary(
 	"MANIFEST.in",
         "//tensorflow/core/user_ops/insoundz_ops/tf_insoundz/rankoneupdate:rankoneupdate_py",
         "//tensorflow/core/user_ops/insoundz_ops/tf_insoundz/hermitian_matmul:hermitian_matmul_py",
+        "//tensorflow/core/user_ops/insoundz_ops/tf_insoundz/matrix_scale:matrix_scale_py",
     ],
 )
