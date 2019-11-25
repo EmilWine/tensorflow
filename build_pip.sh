@@ -7,8 +7,6 @@ then
 	exit 1
 fi
 
-echo "Patching eigen to support Tensor FFT with MKL"
-combinediff ./third_party/eigen3/gpu_packet_math.patch ./third_party/eigen3/tensor_fft.patch | combinediff - ./third_party/eigen3/blas_syr.patch > ./third_party/eigen3/eigen.patch
 
 MKLML_PREFACE="mklml_lnx_2019.0.5.20190502"
 echo "######   Preparing MKL Library for compilation   ######"
