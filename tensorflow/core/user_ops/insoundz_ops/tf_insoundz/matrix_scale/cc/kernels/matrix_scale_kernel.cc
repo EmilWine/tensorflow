@@ -12,67 +12,37 @@
 #include "tensorflow/core/framework/shape_inference.h"
 
 using namespace tensorflow;
-using namespace Eigen;
 
 template <class Scalar>
-class MatrixScaleOp : public LinearAlgebraOp<Scalar> {
- public:
-  INHERIT_LINALG_TYPEDEFS(Scalar);
+class MatrixScaleOp : public OpKernel {
+	public:
+		explicit MatrixScaleOp(OpKernelConstruction* context) : OpKernel(context) { }
+		typedef Eigen::Map<Eigen::Matrix<Scalar,Eigen::Dynamic,1> > ResMap;
 
-  explicit MatrixScaleOp(OpKernelConstruction* context) : Base(context) { }
+		void Compute(OpKernelContext* context) override {
+			// Grab the input tensor
+			const Tensor& input_tensor = context->input(0);
+			const auto& alpha_in = context->input(1);
+			
+			OP_REQUIRES(
+					context, TensorShapeUtils::IsScalar(alpha_in.shape()),
+					errors::InvalidArgument("alpha must be scalar, got shape",
+						alpha_in.shape().DebugString()));
+			const Scalar alpha = alpha_in.scalar<Scalar>()();
 
-  int NumMatrixInputs(const OpKernelContext* context) const final { return 1; }
+			// Create an output tensor
+			Tensor* output_tensor = NULL;
+			OP_REQUIRES_OK(context, context->allocate_output(0, input_tensor.shape(),
+						&output_tensor));
+			CHECK(output_tensor->CopyFrom(input_tensor, output_tensor->shape()));
 
-  void ValidateInputMatrixShapes(
-		  OpKernelContext* context,
-		  const TensorShapes& input_matrix_shapes) const final {
-	  //Nothing to validate
-  }
-
-
-  TensorShapes GetOutputMatrixShapes(
-      const TensorShapes& input_matrix_shapes) const final {
-	  return TensorShapes({input_matrix_shapes[0]});
-  }
-
-
-  int64 GetCostPerUnit(const TensorShapes& input_matrix_shapes) const final {
-	  double cost = static_cast<double>(input_matrix_shapes[0].num_elements());
-	  return cost >= static_cast<double>(kint64max) ? kint64max
-		  : static_cast<int64>(cost);
-  }
-
-  bool EnableInputForwarding() const final { return false; }
-
-  void ComputeMatrix(OpKernelContext* context, const ConstMatrixMaps& inputs,
-                     MatrixMaps* outputs) final {
-
-    const ConstMatrixMap& matrix = inputs[0];
-    const auto& alpha_in = context->input(1);
-
-    OP_REQUIRES(
-        context, TensorShapeUtils::IsScalar(alpha_in.shape()),
-        errors::InvalidArgument("alpha must be scalar, got shape ",
-                                alpha_in.shape().DebugString()));
-    const Scalar alpha = alpha_in.scalar<Scalar>()();
-    
-    if (matrix.rows() == 0 || matrix.cols() == 0) {
-      return;
-    }
-
-    MatrixMap& output = outputs->at(0);
-    output.setZero();
-    matrix_scale_add<MatrixMap, const ConstMatrixMap>::run(output,matrix,alpha);		
-  }
+			auto output_flat = output_tensor->flat<Scalar>();
+			ResMap output_map = ResMap(output_flat.data(),output_flat.size());
+			Eigen::matrix_scale_add<ResMap>::run(output_map,alpha);		
+		}
 };
 
-
-REGISTER_LINALG_OP("MatrixScale", (MatrixScaleOp<float>), float);
-REGISTER_LINALG_OP("MatrixScale", (MatrixScaleOp<double>), double);
-REGISTER_LINALG_OP("MatrixScale", (MatrixScaleOp<complex64>), complex64);
-REGISTER_LINALG_OP("MatrixScale", (MatrixScaleOp<complex128>), complex128);
-REGISTER_LINALG_OP("BatchMatrixScale", (MatrixScaleOp<float>), float);
-REGISTER_LINALG_OP("BatchMatrixScale", (MatrixScaleOp<double>), double);
-REGISTER_LINALG_OP("BatchMatrixScale", (MatrixScaleOp<complex64>), complex64);
-REGISTER_LINALG_OP("BatchMatrixScale", (MatrixScaleOp<complex128>), complex128);
-
+REGISTER_KERNEL_BUILDER(Name("MatrixScale").Device(DEVICE_CPU).TypeConstraint<float>("T"), MatrixScaleOp<float>);
+REGISTER_KERNEL_BUILDER(Name("MatrixScale").Device(DEVICE_CPU).TypeConstraint<double>("T"), MatrixScaleOp<double>);
+REGISTER_KERNEL_BUILDER(Name("MatrixScale").Device(DEVICE_CPU).TypeConstraint<complex64>("T"), MatrixScaleOp<complex64>);
+REGISTER_KERNEL_BUILDER(Name("MatrixScale").Device(DEVICE_CPU).TypeConstraint<complex128>("T"), MatrixScaleOp<complex128>);
