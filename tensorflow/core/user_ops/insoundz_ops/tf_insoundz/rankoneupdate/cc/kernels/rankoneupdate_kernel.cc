@@ -81,6 +81,9 @@ class RankOneUpdateOp : public LinearAlgebraOp<Scalar> {
 
   void ComputeMatrix(OpKernelContext* context, const ConstMatrixMaps& inputs,
                      MatrixMaps* outputs) final {
+
+    typedef Eigen::Map<const Eigen::Matrix<Scalar, 1,Eigen::Dynamic,  Eigen::RowMajor>> ConstVectorMap;
+
     const ConstMatrixMap& matrix = inputs[0];
     const ConstMatrixMap& rhs = inputs[1];
     const auto& alpha_in = context->input(2);
@@ -113,9 +116,12 @@ class RankOneUpdateOp : public LinearAlgebraOp<Scalar> {
     auto triangle = output.template selfadjointView<Eigen::Lower>();
 
     //Perform the rank update on the output materix
-    triangle.rankUpdate(rhs,alpha);
-    //output.noalias() = triangle.rankUpdate(rhs,alpha);
-    //outputs->at(0).template selfadjointView<Eigen::Lower>().rankUpdate(rhs,alpha);
+    
+    //Convert rhs to vector type if is vector
+    if (rhs.rows() == 1) 
+            triangle.rankUpdate(ConstVectorMap(rhs.data(),rhs.size()),alpha);
+    else
+	    triangle.rankUpdate(rhs,alpha);
   }
 };
 
