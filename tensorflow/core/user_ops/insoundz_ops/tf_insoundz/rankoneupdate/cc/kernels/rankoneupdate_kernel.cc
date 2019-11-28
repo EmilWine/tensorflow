@@ -118,10 +118,7 @@ class RankOneUpdateOp : public LinearAlgebraOp<Scalar> {
     //Perform the rank update on the output materix
     
     //Convert rhs to vector type if is vector
-    if (rhs.rows() == 1) 
-            triangle.rankUpdate(ConstVectorMap(rhs.data(),rhs.size()),alpha);
-    else
-	    triangle.rankUpdate(rhs,alpha);
+    triangle.rankUpdate(rhs,alpha);
   }
 };
 
