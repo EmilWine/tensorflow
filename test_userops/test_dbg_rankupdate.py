@@ -11,7 +11,7 @@ config.set_intra_op_parallelism_threads(1)
 N = 2
 alpha = tf.constant(0.9,'complex64')
 a = tf.cast(tf.ones(shape=(N,N)),dtype='complex64')
-x = tf.cast(3*tf.ones(shape=(N,1)),dtype='complex64')
+x = tf.cast(3*tf.ones(shape=(N,2)),dtype='complex64')
 z = mod.rank_one_update(a,x,alpha)
 print(z)
 
