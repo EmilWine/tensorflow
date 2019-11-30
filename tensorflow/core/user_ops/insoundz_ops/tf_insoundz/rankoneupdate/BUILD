@@ -1,30 +1,15 @@
 package(default_visibility = ["//visibility:public"])
 load("//tensorflow:tensorflow.bzl", "tf_custom_op_library")
 
-#cc_binary(
-#    name = 'python/ops/_time_two_ops.so',
-#    srcs = [
-#        "cc/kernels/time_two.h",
-#        "cc/kernels/time_two_kernels.cc",
-#        "cc/ops/time_two_ops.cc",
-#    ],
-#    linkshared = 1,
-#    deps = [
-#        "@local_config_tf//:libtensorflow_framework",
-#        "@local_config_tf//:tf_header_lib",
-#    ] + if_cuda_is_configured([":time_two_ops_gpu"]),
-#    copts = ["-pthread", "-std=c++11", "-D_GLIBCXX_USE_CXX11_ABI=0"] + if_cuda(["-DGOOGLE_CUDA=1"])
-#)
-
 tf_custom_op_library(
 		name = "python/ops/_rankoneupdate_ops.so",
 		srcs = ["cc/kernels/rankoneupdate_kernel.cc",
 			"cc/ops/rankoneupdate_ops.cc",
 	  	],
-		deps = 
-		["//tensorflow/core:framework",
-		  "//tensorflow/core:lib",
-		  "//tensorflow/core/kernels:linalg_ops_common"
+		deps = [
+			"//tensorflow/core:framework",
+			"//tensorflow/core:lib",
+			"//tensorflow/core/user_ops/insoundz_ops/tf_insoundz/common_inz:linear_algebra_inplace",
 	  	])
 
 py_library(

@@ -4,6 +4,7 @@
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/kernels/linalg_ops_common.h"
+#include "tensorflow/core/user_ops/insoundz_ops/tf_insoundz/common_inz/linear_algebra_inplace.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/types.h"
@@ -14,43 +15,12 @@
 using namespace tensorflow;
 
 template <class Scalar>
-class RankOneUpdateOp : public LinearAlgebraOp<Scalar> {
+class RankOneUpdateOp : public LinearAlgebraInPlaceOp<Scalar> {
  public:
-  using TensorInputs = gtl::InlinedVector<const Tensor*, 4>;
-  using TensorOutputs = gtl::InlinedVector<Tensor*, 4>;
-  INHERIT_LINALG_TYPEDEFS(Scalar);
+  INHERIT_LINALG_INPLACE_TYPEDEFS(Scalar);
 
-  explicit RankOneUpdateOp(OpKernelConstruction* context) : LinearAlgebraOp<Scalar>(context) { }
+  explicit RankOneUpdateOp(OpKernelConstruction* context) : LinearAlgebraInPlaceOp<Scalar>(context) { }
 
-  void Compute(OpKernelContext* context){
-	  TensorInputs inputs;
-	  TensorShapes input_matrix_shapes;
-	  TensorShape batch_shape;
-	  Base::AnalyzeInputs(context, &inputs, &input_matrix_shapes, &batch_shape);
-
-	  TensorShapes output_matrix_shapes;
-	  TensorOutputs outputs;
-	  Base::PrepareOutputs(context, input_matrix_shapes, batch_shape, &outputs,
-			  &output_matrix_shapes);
-
-	  //This is the main addition: in place operation
-	  //This basically copies the input tensor to output
-	  Tensor* output_tensor = context->mutable_output(0);
-	  const Tensor& input_tensor = context->input(0);
-	  CHECK(output_tensor->CopyFrom(input_tensor, output_tensor->shape()));
-
-	  // Process the individual matrix problems in parallel using a threadpool.
-	  auto shard = [this, &inputs, &input_matrix_shapes, &outputs,
-	       &output_matrix_shapes, context](int64 begin, int64 end) {
-	               for (int64 i = begin; i < end; ++i) {
-			       Base::ComputeTensorSlice(context, i, inputs, input_matrix_shapes, outputs,
-	        			       output_matrix_shapes);
-	               }
-	       };
-	  auto worker_threads = *(context->device()->tensorflow_cpu_worker_threads());
-	  Shard(worker_threads.num_threads, worker_threads.workers,
-			  batch_shape.num_elements(), GetCostPerUnit(input_matrix_shapes), shard);
-  }
 
   // Tell the base class to ignore the alpha parameter
   // in context->input(2).
