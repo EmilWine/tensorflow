@@ -24,7 +24,8 @@ DEBUG="-c dbg --copt=-g --copt=-O0 --cxxopt=-O0 --cxxopt=-g --strip=never -s"
 RELEASE="-c opt"
 #BUILD_ARGS=$DEBUG
 
-OPTIM="--copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both"
+OPTIM="--copt=-march=skylake"
+#OPTIM="--copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both"
 BUILD_ARGS="$RELEASE $OPTIM"
 
 JOBS=$(($(grep -c processor /proc/cpuinfo)-2))
