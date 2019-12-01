@@ -7,11 +7,11 @@ void LinearAlgebraInPlaceOp<Scalar>::Compute(OpKernelContext* context) {
 	TensorInputs inputs;
 	TensorShapes input_matrix_shapes;
 	TensorShape batch_shape;
-	Base::AnalyzeInputs(context, &inputs, &input_matrix_shapes, &batch_shape);
+	this->AnalyzeInputs(context, &inputs, &input_matrix_shapes, &batch_shape);
 
 	TensorShapes output_matrix_shapes;
 	TensorOutputs outputs;
-	Base::PrepareOutputs(context, input_matrix_shapes, batch_shape, &outputs,
+	this->PrepareOutputs(context, input_matrix_shapes, batch_shape, &outputs,
 			&output_matrix_shapes);
 
 	//This is the main addition: in place operation
@@ -24,7 +24,7 @@ void LinearAlgebraInPlaceOp<Scalar>::Compute(OpKernelContext* context) {
 	auto shard = [this, &inputs, &input_matrix_shapes, &outputs,
 	     &output_matrix_shapes, context](int64 begin, int64 end) {
 		     for (int64 i = begin; i < end; ++i) {
-			     Base::ComputeTensorSlice(context, i, inputs, input_matrix_shapes, outputs,
+			     this->ComputeTensorSlice(context, i, inputs, input_matrix_shapes, outputs,
 					     output_matrix_shapes);
 		     }
 	     };
@@ -34,6 +34,7 @@ void LinearAlgebraInPlaceOp<Scalar>::Compute(OpKernelContext* context) {
 }
 
 // Explicitly instantiate LinearAlgebraInPlaceOp for the scalar types we expect to use.
+// Otherwise this class is not linked because of bazel shit
 template class LinearAlgebraInPlaceOp<float>;
 template class LinearAlgebraInPlaceOp<double>;
 template class LinearAlgebraInPlaceOp<complex64>;

@@ -3,13 +3,13 @@ load("//tensorflow:tensorflow.bzl", "tf_custom_op_library")
 
 tf_custom_op_library(
 		name = "python/ops/_matrix_scale_ops.so",
-		srcs = ["cc/kernels/matrix_scale_kernel.cc",
+		srcs = ["cc/kernels/matrix_scale_kernel_linalg.cc",
 			"cc/ops/matrix_scale_ops.cc", 
 	  	],
 		deps = 
 		["//tensorflow/core:framework",
 		  "//tensorflow/core:lib",
-		  "//tensorflow/core/kernels:linalg_ops_common"
+	       	  "//tensorflow/core/user_ops/insoundz_ops/tf_insoundz/common_inz:linear_algebra_inplace",
 	  	])
 
 py_library(

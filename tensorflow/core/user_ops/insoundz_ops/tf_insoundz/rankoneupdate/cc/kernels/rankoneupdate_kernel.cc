@@ -19,7 +19,7 @@ class RankOneUpdateOp : public LinearAlgebraInPlaceOp<Scalar> {
  public:
   INHERIT_LINALG_INPLACE_TYPEDEFS(Scalar);
 
-  explicit RankOneUpdateOp(OpKernelConstruction* context) : LinearAlgebraInPlaceOp<Scalar>(context) { }
+  explicit RankOneUpdateOp(OpKernelConstruction* context) : Base(context) { }
 
 
   // Tell the base class to ignore the alpha parameter

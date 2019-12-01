@@ -4,6 +4,7 @@
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/kernels/linalg_ops_common.h"
+#include "tensorflow/core/user_ops/insoundz_ops/tf_insoundz/common_inz/linear_algebra_inplace.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/types.h"
@@ -15,9 +16,9 @@ using namespace tensorflow;
 using namespace Eigen;
 
 template <class Scalar>
-class MatrixScaleOp : public LinearAlgebraOp<Scalar> {
+class MatrixScaleOp : public LinearAlgebraInPlaceOp<Scalar> {
  public:
-  INHERIT_LINALG_TYPEDEFS(Scalar);
+  INHERIT_LINALG_INPLACE_TYPEDEFS(Scalar);
 
   explicit MatrixScaleOp(OpKernelConstruction* context) : Base(context) { }
 
