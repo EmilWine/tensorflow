@@ -27,6 +27,7 @@ class LinearAlgebraInPlaceOp : public LinearAlgebraOp<Scalar> {
   void Compute(OpKernelContext* context) override;
 
 };
+
 #define INHERIT_LINALG_INPLACE_TYPEDEFS(Scalar)               \
   typedef LinearAlgebraInPlaceOp<Scalar> Base;                \
   using RealScalar = typename Eigen::NumTraits<Scalar>::Real; \

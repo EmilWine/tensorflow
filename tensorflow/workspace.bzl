@@ -184,7 +184,7 @@ def tf_repositories(path_prefix = "", tf_repo_name = ""):
         name = "eigen_archive",
         build_file = clean_dep("//third_party:eigen.BUILD"),
         patch_file = clean_dep("//third_party/eigen3:gpu_packet_math.patch"),
-        sha256 = "e7e4e6fab9bf1509a61ab20e4238902ea8ab1e02f39bd0513551b464ef8a80eb",
+        sha256 = "62ea2329e9b7d1a5389f33f568853cc1e8668acc94473ff6f1c451a164d68e2c",
         strip_prefix = "eigen-git-mirror-master_tf",
         urls = [
         	"https://github.com/EmilWine/eigen-git-mirror/archive/master_tf.tar.gz",

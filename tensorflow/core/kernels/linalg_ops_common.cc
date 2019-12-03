@@ -79,8 +79,7 @@ void LinearAlgebraOp<InputScalar, OutputScalar>::ValidateSquareSolver(
       errors::InvalidArgument("First input (lhs) must be a square matrix."));
   OP_REQUIRES(context, TensorShapeUtils::IsMatrix(input_matrix_shapes[1]),
               errors::InvalidArgument("Second input (rhs) must be a matrix."));
-  OP_REQUIRES(
-      context,
+  OP_REQUIRES( context,
       input_matrix_shapes[0].dim_size(0) == input_matrix_shapes[1].dim_size(0),
       errors::InvalidArgument("Input matrix and rhs are incompatible."));
 }

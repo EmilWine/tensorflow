@@ -18,6 +18,10 @@ void LinearAlgebraInPlaceOp<Scalar>::Compute(OpKernelContext* context) {
 	//This basically copies the input tensor to output
 	Tensor* output_tensor = context->mutable_output(0);
 	const Tensor& input_tensor = context->input(0);
+	//Note: CopyFrom doesnt actually copy the buffer. 
+	//It sets the output_tensor buffer to point to input_tensor buffer.
+	//This means operations occur in-place
+
 	CHECK(output_tensor->CopyFrom(input_tensor, output_tensor->shape()));
 
 	// Process the individual matrix problems in parallel using a threadpool.
